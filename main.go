@@ -27,6 +27,13 @@ const (
 	CmdPush = "push"
 )
 
+type CommandStateTupple struct {
+	Command string
+	State   State
+}
+
+type TransitionFunc func(state *State)
+
 func prompt(s State) {
 	m := map[State]string{
 		Locked:   "Locked",
@@ -60,6 +67,24 @@ func step(state State, cmd string) State {
 	return state
 }
 
+// StateTransitionTable 状态转换表
+var StateTransitionTable = map[CommandStateTupple]TransitionFunc{
+	{CmdCoin, Locked}: func(state *State) {
+		fmt.Println("已解锁，请通行")
+		*state = Unlocked
+	},
+	{CmdPush, Locked}: func(state *State) {
+		fmt.Println("禁止通行，请先行解锁")
+	},
+	{CmdCoin, Unlocked}: func(state *State) {
+		fmt.Println("大兄弟，已解锁了，别浪费钱了")
+	},
+	{CmdPush, Unlocked}: func(state *State) {
+		fmt.Println("请尽快通行，通行后将自动上锁")
+		*state = Locked
+	},
+}
+
 func main() {
 	// Init state
 	state := Locked
@@ -72,6 +97,14 @@ func main() {
 		if err != nil {
 			log.Fatalln(err)
 		}
-		state = step(state, strings.TrimSpace(cmd))
+
+		// 获取状态转换表中的值
+		tupple := CommandStateTupple{strings.TrimSpace(cmd), state}
+
+		if f := StateTransitionTable[tupple]; f == nil {
+			fmt.Println("未知命令，请重新输入")
+		} else {
+			f(&state)
+		}
 	}
 }
