@@ -86,7 +86,7 @@ func main() {
 		}
 
 		// 获取状态转换表中的值
-		tupple := CommandStateTupple{strings.TrimSpace(cmd), state}
+		tupple := CmdStateTupple{strings.TrimSpace(cmd), state}
 
 		if f := StateTransitionTable[tupple]; f == nil {
 			fmt.Println("未知命令，请重新输入")
