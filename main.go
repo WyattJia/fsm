@@ -35,6 +35,31 @@ func prompt(s State) {
 	fmt.Printf("当前的状态是[%s], 请输入命令：[coin|push]\n", m[s])
 }
 
+func step(state State, cmd string) State {
+	if cmd != CmdCoin && cmd != CmdPush {
+		fmt.Println("未知命令，请重新输入")
+		return state
+	}
+
+	switch state {
+	case Locked:
+		if cmd == CmdCoin {
+			fmt.Println("已解锁，请通行")
+			state = Unlocked
+		} else {
+			fmt.Println("禁止通行，请先解锁")
+		}
+	case Unlocked:
+		if cmd == CmdCoin {
+			fmt.Println("大兄弟，别浪费钱了，现在已经解锁了")
+		} else {
+			fmt.Println("请通行，通行之后将会关闭")
+			state = Locked
+		}
+	}
+	return state
+}
+
 func main() {
 	// Init state
 	state := Locked
@@ -47,28 +72,6 @@ func main() {
 		if err != nil {
 			log.Fatalln(err)
 		}
-
-		cmd = strings.TrimSpace(cmd)
-
-		switch state {
-		case Locked:
-			if cmd == CmdCoin {
-				fmt.Println("解锁，请通行。")
-				state = Unlocked
-			} else if cmd == CmdPush {
-				fmt.Println("禁止通行，请先解锁")
-			} else {
-				fmt.Println("命令未知，请重新输入")
-			}
-		case Unlocked:
-			if cmd == CmdCoin {
-				fmt.Println("大兄弟，门开着呢，别浪费钱了")
-			} else if cmd == CmdPush {
-				fmt.Println("请通行，通行之后将会关闭")
-				state = Locked
-			} else {
-				fmt.Println("命令未知，请重新输入")
-			}
-		}
+		state = step(state, strings.TrimSpace(cmd))
 	}
 }
