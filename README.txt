@@ -1,1 +1,1 @@
-~ finite-state machine
+~ 有限状态机最小实现，减少不必要的 if-else 。
